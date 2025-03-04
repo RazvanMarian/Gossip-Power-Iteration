@@ -1,0 +1,56 @@
+﻿services:
+  node1:
+    image: gossip
+    container_name: node1
+    environment:
+      - NODE_ID=node1
+      - ASPNETCORE_URLS=http://0.0.0.0:8080
+      - PEERS=http://node2:8080,http://node3:8080
+      - WEIGHTS=http://node2:8080|0.7,http://node3:8080|0.3
+    ports:
+      - "5001:8080"
+    networks:
+      - gossip
+
+  node2:
+    image: gossip
+    container_name: node2
+    environment:
+      - NODE_ID=node2
+      - ASPNETCORE_URLS=http://0.0.0.0:8080
+      - PEERS=http://node1:8080,http://node3:8080
+      - WEIGHTS=http://node1:8080|0.5,http://node3:8080|0.5
+    ports:
+      - "5002:8080"
+    networks:
+      - gossip
+
+  node3:
+    image: gossip
+    container_name: node3
+    environment:
+      - NODE_ID=node3
+      - ASPNETCORE_URLS=http://0.0.0.0:8080
+      - PEERS=http://node1:8080,http://node2:8080
+      - WEIGHTS=http://node1:8080|0.4,http://node2:8080|0.6
+    ports:
+      - "5003:8080"
+    networks:
+      - gossip
+
+  node4:
+    image: gossip
+    container_name: node4
+    environment:
+      - NODE_ID=node4
+      - ASPNETCORE_URLS=http://0.0.0.0:8080
+      - PEERS=http://node1:8080,http://node2:8080
+      - WEIGHTS=http://node1:8080|0.8,http://node2:8080|0.2
+    ports:
+      - "5004:8080"
+    networks:
+      - gossip
+
+networks:
+  gossip:
+    external: true
