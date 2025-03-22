@@ -31,8 +31,8 @@
     environment:
       - NODE_ID=node3
       - ASPNETCORE_URLS=http://0.0.0.0:8080
-      - PEERS=http://node1:8080,http://node2:8080
-      - WEIGHTS=http://node1:8080|0.4,http://node2:8080|0.6
+      - PEERS=http://node1:8080,http://node2:8080,http://node4:8080
+      - WEIGHTS=http://node1:8080|0.4,http://node2:8080|0.5,http://node4:8080|0.1
     ports:
       - "5003:8080"
     networks:

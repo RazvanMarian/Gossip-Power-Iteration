@@ -17,7 +17,7 @@ var app = builder.Build();
 
 app.MapPost("/powerIteration", (PowerIterationMessage msg, PowerIterationState state) =>
 {
-    Console.WriteLine($"PowerIteration from {msg.SourceNode}, Value={msg.Value}");
+    //Console.WriteLine($"PowerIteration from {msg.SourceNode}, Value={msg.Value}");
 
     lock (state)
     {
@@ -29,17 +29,17 @@ app.MapPost("/powerIteration", (PowerIterationMessage msg, PowerIterationState s
 
 app.MapPost("/normalization", (NormalizationMessage msg, PowerIterationState state) =>
 {
-    Console.WriteLine($"Normalization from {msg.SourceNode}, Value={msg.Value}");
+    //Console.WriteLine($"Normalization from {msg.SourceNode}, GrowthRate={msg.Value}");
 
     double receivedValue = msg.Value;
 
     lock (state)
     {
-        double oldValue = state.Weight;
+        double oldGrowthRate = state.GrowthRate;
 
-        state.Weight = (oldValue + receivedValue) / 2.0;
+        state.GrowthRate = (oldGrowthRate + receivedValue) / 2.0;
 
-        return Results.Ok(new NormalizationMessage(msg.SourceNode, oldValue));
+        return Results.Ok(new NormalizationMessage(msg.SourceNode, oldGrowthRate));
     }
 });
 

@@ -32,17 +32,17 @@ public class NormalizationService : BaseBackgroundService
 
         var peer = _peers[_random.Next(_peers.Count)];
 
-        double localValue;
+        double growthRate;
         lock (_state)
         {
-            localValue = _state.Weight;
+            growthRate = _state.GrowthRate;
         }
 
         try
         {
             var url = $"{peer.Url}/normalization";
 
-            var reqMsg = new NormalizationMessage(_nodeId, localValue);
+            var reqMsg = new NormalizationMessage(_nodeId, growthRate);
             var response = await _client.PostAsJsonAsync(url, reqMsg);
 
             var respMsg = await response.Content.ReadFromJsonAsync<NormalizationMessage>();
@@ -52,7 +52,7 @@ public class NormalizationService : BaseBackgroundService
 
                 lock (_state)
                 {
-                    _state.Weight = (_state.Weight + remoteValue) / 2.0;
+                    _state.GrowthRate = (_state.GrowthRate + remoteValue) / 2.0;
                 }
             }
         }

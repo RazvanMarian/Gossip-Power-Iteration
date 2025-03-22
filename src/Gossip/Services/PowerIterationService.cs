@@ -48,11 +48,29 @@ public class PowerIterationService(IHttpClientFactory httpClientFactory,
     {
         lock (_state)
         {
-            _state.Weight = 0;
+            double b = 0;
             foreach (var pair in _state.Bi)
             {
-                _state.Weight += pair.Value;
+                b += pair.Value;
             }
+
+            if (b == 0)
+            {
+                return;
+            }
+
+            double w_old = _state.Weight;
+            if (w_old == 0) w_old = 1;
+
+            double r_new = Math.Log(b / w_old);
+            
+            double r_old = _state.GrowthRate;
+            double w_new = b * Math.Exp(r_old);
+
+            //Console.WriteLine($"weight={w_new}");
+
+            _state.Weight = w_new;
+            _state.GrowthRate = r_new;
         }
     }
 }
