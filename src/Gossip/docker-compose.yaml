@@ -1,12 +1,15 @@
-﻿services:
+﻿version: '3'
+services:
   node1:
     image: gossip
     container_name: node1
     environment:
       - NODE_ID=node1
       - ASPNETCORE_URLS=http://0.0.0.0:8080
-      - PEERS=http://node2:8080,http://node3:8080
-      - WEIGHTS=http://node2:8080|0.7,http://node3:8080|0.3
+      # Peers: node2, node4, node7 (3 vecini)
+      - PEERS=http://node2:8080,http://node4:8080,http://node7:8080
+      # WEIGHTS: node2: 0.5, node4: 0.3, node7: 0.2 (sum = 1)
+      - WEIGHTS=http://node2:8080|0.5,http://node4:8080|0.3,http://node7:8080|0.2
     ports:
       - "5001:8080"
     networks:
@@ -18,8 +21,10 @@
     environment:
       - NODE_ID=node2
       - ASPNETCORE_URLS=http://0.0.0.0:8080
-      - PEERS=http://node1:8080,http://node3:8080
-      - WEIGHTS=http://node1:8080|0.5,http://node3:8080|0.5
+      # Peers: node1, node3, node5, node8 (4 vecini)
+      - PEERS=http://node1:8080,http://node3:8080,http://node5:8080,http://node8:8080
+      # WEIGHTS: node1: 0.2, node3: 0.3, node5: 0.3, node8: 0.2
+      - WEIGHTS=http://node1:8080|0.2,http://node3:8080|0.3,http://node5:8080|0.3,http://node8:8080|0.2
     ports:
       - "5002:8080"
     networks:
@@ -31,8 +36,10 @@
     environment:
       - NODE_ID=node3
       - ASPNETCORE_URLS=http://0.0.0.0:8080
-      - PEERS=http://node1:8080,http://node2:8080,http://node4:8080
-      - WEIGHTS=http://node1:8080|0.4,http://node2:8080|0.5,http://node4:8080|0.1
+      # Peers: node2, node6, node9 (3 vecini)
+      - PEERS=http://node2:8080,http://node6:8080,http://node9:8080
+      # WEIGHTS: node2: 0.4, node6: 0.4, node9: 0.2
+      - WEIGHTS=http://node2:8080|0.4,http://node6:8080|0.4,http://node9:8080|0.2
     ports:
       - "5003:8080"
     networks:
@@ -44,10 +51,102 @@
     environment:
       - NODE_ID=node4
       - ASPNETCORE_URLS=http://0.0.0.0:8080
-      - PEERS=http://node1:8080,http://node2:8080
-      - WEIGHTS=http://node1:8080|0.8,http://node2:8080|0.2
+      # Peers: node1, node2, node5, node7, node10 (5 vecini)
+      - PEERS=http://node1:8080,http://node2:8080,http://node5:8080,http://node7:8080,http://node10:8080
+      # WEIGHTS: node1: 0.1, node2: 0.1, node5: 0.2, node7: 0.3, node10: 0.3
+      - WEIGHTS=http://node1:8080|0.1,http://node2:8080|0.1,http://node5:8080|0.2,http://node7:8080|0.3,http://node10:8080|0.3
     ports:
       - "5004:8080"
+    networks:
+      - gossip
+
+  node5:
+    image: gossip
+    container_name: node5
+    environment:
+      - NODE_ID=node5
+      - ASPNETCORE_URLS=http://0.0.0.0:8080
+      # Peers: node2, node4, node6, node8, node9 (5 vecini)
+      - PEERS=http://node2:8080,http://node4:8080,http://node6:8080,http://node8:8080,http://node9:8080
+      # WEIGHTS: node2: 0.15, node4: 0.25, node6: 0.2, node8: 0.2, node9: 0.2
+      - WEIGHTS=http://node2:8080|0.15,http://node4:8080|0.25,http://node6:8080|0.2,http://node8:8080|0.2,http://node9:8080|0.2
+    ports:
+      - "5005:8080"
+    networks:
+      - gossip
+
+  node6:
+    image: gossip
+    container_name: node6
+    environment:
+      - NODE_ID=node6
+      - ASPNETCORE_URLS=http://0.0.0.0:8080
+      # Peers: node3, node5, node7, node10 (4 vecini)
+      - PEERS=http://node3:8080,http://node5:8080,http://node7:8080,http://node10:8080
+      # WEIGHTS: node3: 0.3, node5: 0.3, node7: 0.2, node10: 0.2
+      - WEIGHTS=http://node3:8080|0.3,http://node5:8080|0.3,http://node7:8080|0.2,http://node10:8080|0.2
+    ports:
+      - "5006:8080"
+    networks:
+      - gossip
+
+  node7:
+    image: gossip
+    container_name: node7
+    environment:
+      - NODE_ID=node7
+      - ASPNETCORE_URLS=http://0.0.0.0:8080
+      # Peers: node1, node4, node6, node8, node9, node10 (6 vecini)
+      - PEERS=http://node1:8080,http://node4:8080,http://node6:8080,http://node8:8080,http://node9:8080,http://node10:8080
+      # WEIGHTS: node1: 0.15, node4: 0.15, node6: 0.2, node8: 0.2, node9: 0.15, node10: 0.15
+      - WEIGHTS=http://node1:8080|0.15,http://node4:8080|0.15,http://node6:8080|0.2,http://node8:8080|0.2,http://node9:8080|0.15,http://node10:8080|0.15
+    ports:
+      - "5007:8080"
+    networks:
+      - gossip
+
+  node8:
+    image: gossip
+    container_name: node8
+    environment:
+      - NODE_ID=node8
+      - ASPNETCORE_URLS=http://0.0.0.0:8080
+      # Peers: node2, node4, node5, node7, node10 (5 vecini)
+      - PEERS=http://node2:8080,http://node4:8080,http://node5:8080,http://node7:8080,http://node10:8080
+      # WEIGHTS: node2: 0.2, node4: 0.2, node5: 0.2, node7: 0.2, node10: 0.2
+      - WEIGHTS=http://node2:8080|0.2,http://node4:8080|0.2,http://node5:8080|0.2,http://node7:8080|0.2,http://node10:8080|0.2
+    ports:
+      - "5008:8080"
+    networks:
+      - gossip
+
+  node9:
+    image: gossip
+    container_name: node9
+    environment:
+      - NODE_ID=node9
+      - ASPNETCORE_URLS=http://0.0.0.0:8080
+      # Peers: node3, node5, node7, node8 (4 vecini)
+      - PEERS=http://node3:8080,http://node5:8080,http://node7:8080,http://node8:8080
+      # WEIGHTS: node3: 0.25, node5: 0.25, node7: 0.25, node8: 0.25
+      - WEIGHTS=http://node3:8080|0.25,http://node5:8080|0.25,http://node7:8080|0.25,http://node8:8080|0.25
+    ports:
+      - "5009:8080"
+    networks:
+      - gossip
+
+  node10:
+    image: gossip
+    container_name: node10
+    environment:
+      - NODE_ID=node10
+      - ASPNETCORE_URLS=http://0.0.0.0:8080
+      # Peers: node4, node6, node7, node8, node9 (5 vecini)
+      - PEERS=http://node4:8080,http://node6:8080,http://node7:8080,http://node8:8080,http://node9:8080
+      # WEIGHTS: node4: 0.2, node6: 0.2, node7: 0.2, node8: 0.2, node9: 0.2
+      - WEIGHTS=http://node4:8080|0.2,http://node6:8080|0.2,http://node7:8080|0.2,http://node8:8080|0.2,http://node9:8080|0.2
+    ports:
+      - "5010:8080"
     networks:
       - gossip
 

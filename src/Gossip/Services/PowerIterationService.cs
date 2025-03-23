@@ -10,14 +10,18 @@ public class PowerIterationService(IHttpClientFactory httpClientFactory,
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        while (!stoppingToken.IsCancellationRequested)
+        while (!stoppingToken.IsCancellationRequested && _state.iterations != 20)
         {
-            int delaySeconds = _random.Next(1, 6);
-            await Task.Delay(TimeSpan.FromSeconds(delaySeconds), stoppingToken);
+            await Task.Delay(TimeSpan.FromSeconds(_delta), stoppingToken);
 
             await SendToNeighbours();
 
             UpdateLocalWeight();
+
+            lock(_state)
+            {
+                _state.iterations++;
+            }
         }
     }
 
@@ -50,27 +54,29 @@ public class PowerIterationService(IHttpClientFactory httpClientFactory,
         {
             double b = 0;
             foreach (var pair in _state.Bi)
-            {
                 b += pair.Value;
-            }
 
-            if (b == 0)
-            {
-                return;
-            }
+            if (b == 0) return;
 
             double w_old = _state.Weight;
-            if (w_old == 0) w_old = 1;
 
             double r_new = Math.Log(b / w_old);
-            
-            double r_old = _state.GrowthRate;
-            double w_new = b * Math.Exp(r_old);
 
-            //Console.WriteLine($"weight={w_new}");
+            double n_i = _state.WeightAverage;
+
+            double c = Math.Exp(_state.GrowthRate) * ((0.2 / (1 + 1/n_i)) + 0.9);
+
+            double epsilon = 0.1;
+
+            double w_new = (1 - epsilon) * (b/c) + epsilon * n_i;
+
+            Console.WriteLine($"weight={w_new} c={c} b={b} n_i={n_i}");
 
             _state.Weight = w_new;
+            _state.WeightAverage = w_new;
             _state.GrowthRate = r_new;
+            _state.Bi.Clear();
         }
     }
+
 }

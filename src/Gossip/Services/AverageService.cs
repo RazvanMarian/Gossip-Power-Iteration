@@ -3,62 +3,63 @@ using Gossip.Services.Abstractions;
 
 namespace Gossip.Services;
 
-public class NormalizationService : BaseBackgroundService
+public class AverageService : BaseBackgroundService
 {
     private new readonly double _delta;
 
-    public NormalizationService(
+    public AverageService(
         IHttpClientFactory httpClientFactory,
         PowerIterationState state,
         IPeerConfigurationLoader peerLoader,
-        IConfiguration config): base(httpClientFactory, config, state, peerLoader)
-    {              
-        _delta = base._delta / 5;
+        IConfiguration config
+    ) : base(httpClientFactory, config, state, peerLoader)
+    {
+        _delta = base._delta / 30;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested && _state.iterations != 20)
         {
-            await Task.Delay(TimeSpan.FromSeconds(_delta), stoppingToken);
+            await Task.Delay(TimeSpan.FromSeconds(_delta), stoppingToken); // Interval la alegere
 
-            await DoNormalizationStep();
+            await DoAverageStep();
         }
     }
 
-    private async Task DoNormalizationStep()
+    private async Task DoAverageStep()
     {
         if (_peers.Count == 0) return;
 
         var peer = _peers[_random.Next(_peers.Count)];
 
-        double growthRate;
+        double localAvg;
         lock (_state)
         {
-            growthRate = _state.GrowthRate;
+            // Poți alege să folosești direct WeightAverage sau Weight
+            localAvg = _state.WeightAverage;
         }
 
         try
         {
-            var url = $"{peer.Url}/normalization";
-
-            var reqMsg = new NormalizationMessage(_nodeId, growthRate);
+            var url = $"{peer.Url}/average";
+            var reqMsg = new AverageMessage(_nodeId, localAvg);
             var response = await _client.PostAsJsonAsync(url, reqMsg);
 
-            var respMsg = await response.Content.ReadFromJsonAsync<NormalizationMessage>();
+            var respMsg = await response.Content.ReadFromJsonAsync<AverageMessage>();
             if (respMsg != null)
             {
                 double remoteValue = respMsg.Value;
 
                 lock (_state)
                 {
-                    _state.GrowthRate = (_state.GrowthRate + remoteValue) / 2.0;
+                    _state.WeightAverage = (_state.WeightAverage + remoteValue) / 2;
                 }
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Normalization error node:{_nodeId} {peer.Url}: {ex.Message}");
+            Console.WriteLine($"Average error node:{_nodeId} {peer.Url}: {ex.Message}");
         }
     }
 }
