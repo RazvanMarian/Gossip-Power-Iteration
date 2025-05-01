@@ -1,65 +1,54 @@
 ﻿using Gossip.Model;
-using Gossip.Services;
-using Gossip.Services.Abstractions;
 using Gossip.Services.Implementations;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddHttpClient();
 
-builder.Services.AddSingleton<PowerIterationState>();
-builder.Services.AddTransient<IPeerConfigurationLoader, PeerConfigurationLoader>();
+builder.Services.AddSingleton<ConsensusState>();
+builder.Services.AddHostedService<ConsensusService>();
 
-builder.Services.AddHostedService<PowerIterationService>();
-builder.Services.AddHostedService<NormalizationService>();
-builder.Services.AddHostedService<AverageService>();
+builder.Logging.AddConsole();
 
 var app = builder.Build();
 
-app.MapPost("/powerIteration", (PowerIterationMessage msg, PowerIterationState state) =>
+app.MapPost("/consensus", (ConsensusMessage msg, ConsensusState state) =>
 {
-    //Console.WriteLine($"PowerIteration from {msg.SourceNode}, Value={msg.Value}");
+    var currentNodeId = Environment.GetEnvironmentVariable("NODE_ID") ?? "UNKNOWN_NODE";
+
+    double weight_i_source = 0;
 
     lock (state)
     {
-        state.Bi[msg.SourceNode] = msg.Value;
+        state.IncomingWeightsMap.TryGetValue(msg.SourceNode, out weight_i_source);
     }
+
+    double weightedValue = msg.Value * weight_i_source; 
+
+    lock (state)
+    {
+        if (!state.IncomingValuesPerIteration.TryGetValue(msg.Iteration, out Dictionary<string, double>? value))
+        {
+            value = [];
+            state.IncomingValuesPerIteration[msg.Iteration] = value;
+        }
+
+        value[msg.SourceNode] = weightedValue;
+
+        int expectedMessages = state.IncomingWeightsMap.Count;
+        int receivedMessagesCount = value.Count;
+
+        bool iterationComplete = receivedMessagesCount == expectedMessages;
+
+        bool isNextIteration = msg.Iteration == state.IterationsCompleted + 1;
+
+        if (iterationComplete && isNextIteration)
+        {
+            Monitor.PulseAll(state);
+        }
+    } 
 
     return Results.Ok();
 });
-
-app.MapPost("/normalization", (NormalizationMessage msg, PowerIterationState state) =>
-{
-    //Console.WriteLine($"Normalization from {msg.SourceNode}, GrowthRate={msg.Value}");
-
-    double receivedValue = msg.Value;
-
-    lock (state)
-    {
-        double oldGrowthRate = state.GrowthRate;
-
-        state.GrowthRate = (oldGrowthRate + receivedValue) / 2.0;
-
-        return Results.Ok(new NormalizationMessage(msg.SourceNode, oldGrowthRate));
-    }
-});
-
-app.MapPost("/average", (AverageMessage msg, PowerIterationState state) =>
-{
-    //Console.WriteLine($"Average from {msg.SourceNode}, Value={msg.Value}");
-
-    double receivedValue = msg.Value;
-
-    lock (state)
-    {
-        double oldAvg = state.WeightAverage;
-        // Aici, strategia cea mai simplă e pairwise averaging
-        state.WeightAverage = (oldAvg + receivedValue) / 2;
-
-        // Returnăm vechea valoare, la fel ca la normalizare
-        return Results.Ok(new AverageMessage(msg.SourceNode, oldAvg));
-    }
-});
-
 
 app.Run();
