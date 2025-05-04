@@ -1,0 +1,114 @@
+.agent-manager {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.agent-manager > button {
+    background-color: #333;
+    color: #e0e0e0;
+    border: 1px solid #777;
+    padding: 10px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
+    margin-bottom: 15px;
+    flex-shrink: 0;
+    width: 100%;
+}
+
+.agent-manager > button:hover {
+    background-color: #444;
+    border-color: #999;
+}
+
+.agent-manager > button:active {
+    transform: scale(0.98);
+    background-color: #505050;
+}
+
+.agent-manager > button:disabled {
+    background-color: #333;
+    border-color: #555;
+    color: #777;
+    cursor: not-allowed;
+    opacity: 0.6;
+    transform: none;
+}
+
+.agent-list {
+    flex-grow: 1;
+    overflow-y: auto;
+    min-height: 0;
+    padding-right: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.agent-editor {
+    border: 2px solid transparent;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #383838;
+    flex-shrink: 0;
+}
+
+.agent-editor strong {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.agent-editor > div {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 5px 10px;
+    align-items: center;
+}
+
+.agent-editor label {
+    color: #ccc;
+}
+
+.agent-editor input {
+    background-color: #555;
+    color: #eee;
+    border: 1px solid #777;
+    border-radius: 3px;
+    padding: 4px 6px;
+}
+
+.agent-editor input[type="number"] {
+    width: 100%;
+}
+
+.agent-editor input[type="color"] {
+    width: 50px;
+    height: 25px;
+    padding: 1px 2px;
+    border: 1px solid #777;
+    cursor: pointer;
+}
+
+.agent-editor button {
+    grid-column: 3;
+    justify-self: end;
+    cursor: pointer;
+    color: #ff6b6b;
+    background: none;
+    border: none;
+    font-size: 1.4em;
+    padding: 0;
+    line-height: 1;
+    transition: color 0.2s ease;
+}
+
+.agent-editor button:hover {
+    color: #fa5252;
+}
